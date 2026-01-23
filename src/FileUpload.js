@@ -1,15 +1,16 @@
 async function upload_handle() {
-    let doc = document.getElementById('fileToUpload').value;
+    let doc = document.getElementById('fileToUpload').files[0];
+
+    const formData = new FormData();
+
+    formData.append('file', doc);
+    formData.append('descript', 'My PDF descrption');
+    formData.append('title', 'My Title');
 
     try {
         const response = await fetch('http://localhost:8080/upload', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                document: doc,
-            })
+            body: formData
         });
 
         const data = await response.json();

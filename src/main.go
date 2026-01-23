@@ -5,13 +5,15 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"mime/multipart"
+	// "io"
 )
 
-/*
-type fileRequest struct {
-	
+type UploadRequest struct {
+	File *multipart.FileHeader `form:"file" binding:"required"`
+	Description string
+	Title string
 }
-*/
 
 type Response struct {
 	success string `json:"result"`
@@ -34,7 +36,38 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// var req fileRequest
+	err := r.ParseMultipartForm(32 << 20)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	file, handler, err :=  r.FormFile("file")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer file.Close()
+
+	uploadReq := UploadRequest{
+		File: handler,
+		Description: r.FormValue("dsecription"),
+		Title: r.FormValue("title"),
+	}
+
+	fmt.Println(uploadReq)
+
+	/*
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	*/
+
+	// fmt.Println(fileBytes)
+
+	w.WriteHeader(http.StatusOK)
 
 	json.NewEncoder(w).Encode(Response{success: "Success!"})
 }
