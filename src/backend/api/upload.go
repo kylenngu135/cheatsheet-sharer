@@ -1,26 +1,27 @@
-package main
+package api
 
 import (
-	"fmt"
-	"encoding/json"
-	"log"
 	"net/http"
 	"mime/multipart"
-	// "io"
+	"io"
+	"os"
+	"path/filepath"
 )
 
+// stores upload documents request
 type UploadRequest struct {
 	File *multipart.FileHeader `form:"file" binding:"required"`
 	Description string
 	Title string
 }
 
+// stores the response
 type Response struct {
 	success string `json:"result"`
 	Error string `json:"err,omitempty"`
 }
 
-func handleUpload(w http.ResponseWriter, r *http.Request) {
+func HandleUpload(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Access-Control-Allow-Origin", "*")
     w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
     w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -36,45 +37,43 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := r.ParseMultipartForm(32 << 20)
+	// set max file size to 32MB
+	r.Body = http.MaxBytesReader(w, r.Body, 32<<20)
+
+	// make a local file if it exceeds 5MB
+	if err := r.ParseMultipartForm(5 << 20); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer r.MultipartForm.RemoveAll()
+
+	// get the uploaded file from "media"
+	uploaded_file, file_header, err := r.FormFile("media")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	defer uploaded_file.Close()
 
-	file, handler, err :=  r.FormFile("file")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
+	// build filepath to store media
+	flagStoragePath := "/home/kylenngu/programming/go/CheatSheet-sharer/storage/media"
+	path := filepath.Join(flagStoragePath, file_header.Filename)
 
-	uploadReq := UploadRequest{
-		File: handler,
-		Description: r.FormValue("dsecription"),
-		Title: r.FormValue("title"),
-	}
-
-	fmt.Println(uploadReq)
-
-	/*
-	fileBytes, err := io.ReadAll(file)
+	// create file to save data to
+	file, err := os.Create(path)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	*/
+	defer file.Close()
 
-	// fmt.Println(fileBytes)
+	// copy file contents from uploaded to new file
+	_, err1 := io.Copy(file, uploaded_file)
 
-	w.WriteHeader(http.StatusOK)
-
-	json.NewEncoder(w).Encode(Response{success: "Success!"})
-}
-
-func main() {
-	http.HandleFunc("/upload", handleUpload)
-
-	fmt.Println("Server running on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	if err1 != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	w.Write([]byte("uploaded"))
 }
