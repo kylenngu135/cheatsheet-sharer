@@ -1,6 +1,7 @@
-package api
+package cheatsheets
 
 import (
+	"fmt"
 	"net/http"
 	"mime/multipart"
 	"io"
@@ -46,6 +47,7 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 
 	// get the uploaded file from "media"
 	uploaded_file, file_header, err := r.FormFile("media")
+
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -58,7 +60,9 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 
 	// create file to save data to
 	file, err := os.Create(path)
+
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

@@ -8,6 +8,7 @@ import (
 
 	// own custom modules
 	"cheatsheet/api"
+	"cheatsheet/api/cheatsheets"
 	"cheatsheet/middleware"
 	
 )
@@ -18,7 +19,7 @@ func main() {
 	http.Handle("/", fs_ui)
 	http.Handle("/frontend/", http.StripPrefix("/frontend/", fs_frontend))
 
-	http.HandleFunc("/upload", api.HandleUpload)
+	http.HandleFunc("/api/cheatsheets", cheatsheets.HandleUpload)
 	http.HandleFunc("/api/files", api.ListPDF)
 	http.HandleFunc("/api/files/", api.ShowPDF)
 
