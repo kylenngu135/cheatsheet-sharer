@@ -22,9 +22,6 @@ type Response struct {
 }
 
 func HandleUpload(w http.ResponseWriter, r *http.Request) {
-    w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
-    w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
     w.Header().Set("Content-Type", "application/json") // Tell the client we're sending JSON
 
 	if r.Method == "OPTIONS" {
@@ -56,7 +53,7 @@ func HandleUpload(w http.ResponseWriter, r *http.Request) {
 	defer uploaded_file.Close()
 
 	// build filepath to store media
-	flagStoragePath := "/home/kylenngu/programming/go/CheatSheet-sharer/storage/media"
+	flagStoragePath := "../../storage/media/"
 	path := filepath.Join(flagStoragePath, file_header.Filename)
 
 	// create file to save data to

@@ -8,6 +8,8 @@ import (
 
 	// own custom modules
 	"cheatsheet/api"
+	"cheatsheet/middleware"
+	
 )
 
 func main() {
@@ -17,7 +19,9 @@ func main() {
 	http.Handle("/frontend/", http.StripPrefix("/frontend/", fs_frontend))
 
 	http.HandleFunc("/upload", api.HandleUpload)
+	http.HandleFunc("/api/files", api.ListPDF)
+	http.HandleFunc("/api/files/", api.ShowPDF)
 
 	fmt.Println("Server running on http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", middleware.EnableCORS(http.DefaultServeMux)))
 }

@@ -3,6 +3,7 @@ export function addUploadButtonListener() {
     document.addEventListener('DOMContentLoaded', function() {
         const pubBtn = document.getElementById('uploadButton');
         pubBtn.addEventListener('click', uploadHandle);
+        console.log("clicked")
     });
 }
 
