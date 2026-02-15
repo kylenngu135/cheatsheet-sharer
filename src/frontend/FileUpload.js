@@ -17,7 +17,7 @@ async function uploadHandle() {
     formData.append('title', 'My Title');
 
     try {
-        const response = await fetch('http://localhost:8080/api/cheatsheet', {
+        const response = await fetch('http://localhost:8080/api/cheatsheets', {
             method: 'POST',
             body: formData
         });
